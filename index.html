@@ -5,132 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GasSaver Premium Pro - MetaMask</title>
     <style>
-        body {
-            background-color: #0d1117;
-            color: #c9d1d9;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background-color: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 16px;
-            padding: 25px;
-            width: 90%;
-            max-width: 450px;
-            text-align: center;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-            position: relative;
-        }
+        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background-color: #161b22; border: 1px solid #30363d; border-radius: 16px; padding: 25px; width: 90%; max-width: 450px; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.5); position: relative; }
         h1 { color: #58a6ff; margin-bottom: 5px; }
         p { color: #8b949e; font-size: 14px; margin-bottom: 20px; }
-        .credit-badge {
-            background-color: #21262d;
-            border: 1px solid #30363d;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            color: #f1e05a;
-            display: inline-block;
-            margin-bottom: 15px;
-        }
-        .network-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-        .network-card {
-            background: #21262d;
-            border-radius: 12px;
-            padding: 15px;
-            border: 1px solid #30363d;
-            text-align: left;
-        }
+        .credit-badge { background-color: #21262d; border: 1px solid #30363d; padding: 4px 10px; border-radius: 20px; font-size: 12px; color: #f1e05a; display: inline-block; margin-bottom: 15px; }
+        .network-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        .network-card { background: #21262d; border-radius: 12px; padding: 15px; border: 1px solid #30363d; text-align: left; }
         .network-card h3 { margin: 0 0 5px 0; font-size: 16px; }
         .gas-value { font-size: 24px; font-weight: bold; color: #3fb950; margin: 5px 0; }
         .status-badge { font-size: 11px; font-weight: bold; color: #3fb950; }
-        .suggestion-box {
-            background-color: rgba(88, 166, 255, 0.1);
-            border: 1px dashed #58a6ff;
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 13px;
-            color: #58a6ff;
-            margin: 20px 0;
-            text-align: left;
-        }
-        .btn-refresh {
-            background-color: #238636;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            width: 100%;
-            margin-top: 10px;
-        }
+        .suggestion-box { background-color: rgba(88, 166, 255, 0.1); border: 1px dashed #58a6ff; padding: 15px; border-radius: 12px; font-size: 13px; color: #58a6ff; margin: 20px 0; text-align: left; line-height: 1.4; }
+        .btn-refresh { background-color: #238636; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
         .btn-refresh:hover { background-color: #2ea44f; }
         
-        .paywall-overlay {
-            display: none;
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(22, 27, 34, 0.98);
-            border-radius: 16px;
-            z-index: 10;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .paywall-box {
-            border: 1px solid #f1e05a;
-            padding: 25px;
-            border-radius: 12px;
-            background: #21262d;
-            width: 85%;
-        }
-        .btn-web3 {
-            background-color: #f1e05a;
-            color: #000;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 12px;
-            width: 100%;
-            font-size: 14px;
-            transition: 0.2s;
-        }
+        .paywall-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(22, 27, 34, 0.98); border-radius: 16px; z-index: 10; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .paywall-box { border: 1px solid #f1e05a; padding: 25px; border-radius: 12px; background: #21262d; width: 85%; }
+        .btn-web3 { background-color: #f1e05a; color: #000; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 12px; width: 100%; font-size: 14px; transition: 0.2s; }
         .btn-web3:hover { background-color: #e2d14b; }
-        .btn-pay {
-            background-color: #3fb950;
-            color: white;
-        }
+        .btn-pay { background-color: #3fb950; color: white; }
         .btn-pay:hover { background-color: #2ea44f; }
-        .status-log {
-            font-size: 12px;
-            color: #8b949e;
-            margin-top: 10px;
-            font-style: italic;
-        }
+        .status-log { font-size: 12px; color: #8b949e; margin-top: 10px; font-style: italic; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- MetaMask Web3 Automated Paywall -->
     <div class="paywall-overlay" id="paywall">
         <div class="paywall-box">
             <h2 style="color: #f1e05a; margin-top: 0;">🔒 Limit Reached</h2>
-            <p style="margin-bottom: 15px;">You have used your 3 free weekly scans. Pay 5 USDT via MetaMask to unlock lifetime access.</p>
+            <p>You have used your 3 free scans. Pay 5 USDT via MetaMask to unlock lifetime access.</p>
             
             <div style="font-weight: bold; color: #fff; margin-bottom: 5px;">Network: BNB Smart Chain (BSC)</div>
             <div style="font-weight: bold; color: #3fb950; margin-top: 5px;">Price: 5.00 USDT</div>
@@ -143,9 +47,9 @@
     </div>
 
     <h1>⛽ GasSaver Pro</h1>
-    <p>Predict & save up to 70% on crypto network fees</p>
+    <p>Live & accurate crypto network fee monitor</p>
     
-    <div class="credit-badge" id="credit-text">Weekly Scans Left: 3</div>
+    <div class="credit-badge" id="credit-text">Free Scans Left: 3</div>
 
     <div class="network-grid">
         <div class="network-card">
@@ -159,14 +63,14 @@
             <div class="status-badge" id="btc-status">Loading...</div>
         </div>
         <div class="network-card">
-            <h3>Solana Price (SOL)</h3>
-            <div class="gas-value" id="sol-gas">-- USD</div>
+            <h3>Solana Gas (SOL)</h3>
+            <div class="gas-value" id="sol-gas">-- CU</div>
             <div class="status-badge" id="sol-status">Loading...</div>
         </div>
     </div>
 
     <div class="suggestion-box" id="suggestion-text">
-        Analyzing cross-chain network traffic to optimize your fees...
+        Fetching live market data to optimize your transaction timing...
     </div>
 
     <button class="btn-refresh" onclick="updateAllGasPrices()">🔄 Check Live Rates</button>
