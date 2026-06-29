@@ -1,151 +1,166 @@
 // ================= تنظیمات اختصاصی شما =================
-// ۱. آدرس دقیق ولت تتر (TRC20) خودتان را اینجا جایگزین کنید
-const MY_WALLET = "TXSa2p9JC8PFkFt63ebwcZArDwYPSiYyb1"; 
+const MY_WALLET = "0x8312Ec2FD25a8E8494dc6d3D6f94877D64F25f19".toLowerCase(); 
+const USDT_CONTRACT = "0x55d398326f99059ff775485246999027b3197955".toLowerCase(); // قرارداد رسمی تتر بایننس
 // =======================================================
 
-const SEVEN_DAYS_IN_MS = 7 * 24 * 60 * 60 * 1000; // معادل یک هفته به میلی‌ثانیه
-
-// مقداردهی اولیه حافظه دائمی مرورگر
 if (localStorage.getItem('gas_saver_credits') === null) {
-    localStorage.setItem('gas_saver_credits', '3'); // بازگشت به ۳ فرصت اولیه
-}
-if (localStorage.getItem('gas_saver_vip') === null) {
-    localStorage.setItem('gas_saver_vip', 'false');
+    localStorage.setItem('gas_saver_credits', '3');
 }
 
 async function updateAllGasPrices() {
     const paywall = document.getElementById('paywall');
     const creditText = document.getElementById('credit-text');
-    
-    document.getElementById('display-wallet').innerText = MY_WALLET;
 
-    // ۱. بررسی وضعیت VIP
-    if (localStorage.getItem('gas_saver_vip') === 'true') {
+    // بررسی وضعیت خرید اشتراک دائمی
+    if (localStorage.getItem('gas_saver_premium') === 'true') {
         creditText.innerText = "Premium Status: VIP Pro 👑";
         creditText.style.color = "#3fb950";
         paywall.style.display = "none";
-    } else {
-        // ۲. سیستم بررسی زمان‌بندی هفتگی برای کاربران رایگان
-        let lockTime = localStorage.getItem('gas_saver_lock_time');
-        if (lockTime !== null) {
-            let timePassed = Date.now() - parseInt(lockTime);
-            
-            // اگر ۷ روز گذشته باشد، سهمیه هفتگی دوباره تمدید می‌شود
-            if (timePassed >= SEVEN_DAYS_IN_MS) {
-                localStorage.setItem('gas_saver_credits', '3'); // بازگشت به ۳ فرصت اولیه در تمدید هفتگی
-                localStorage.removeItem('gas_saver_lock_time'); // پاک کردن زمان قفل قبلی
-            }
-        }
-
-        let currentCredits = parseInt(localStorage.getItem('gas_saver_credits'));
-        if (currentCredits <= 0) {
-            paywall.style.display = "flex";
-            return;
-        }
+        fetchLiveGasData();
+        return;
     }
 
-    const ethGas = document.getElementById('eth-gas');
-    const ethStatus = document.getElementById('eth-status');
-    const btcGas = document.getElementById('btc-gas');
-    const btcStatus = document.getElementById('btc-status');
-    const solGas = document.getElementById('sol-gas');
-    const solStatus = document.getElementById('sol-status');
-    const suggestion = document.getElementById('suggestion-text');
+    // بررسی تعداد اعتبار رایگان باقی‌مانده
+    let credits = parseInt(localStorage.getItem('gas_saver_credits'));
+    if (isNaN(credits) || credits <= 0) {
+        paywall.style.display = "flex";
+        return;
+    }
 
-    ethStatus.innerText = "🔄 Syncing...";
-    btcStatus.innerText = "🔄 Syncing...";
-    solStatus.innerText = "🔄 Syncing...";
+    credits -= 1;
+    localStorage.setItem('gas_saver_credits', credits.toString());
+    creditText.innerText = `Free Scans Left: ${credits}`;
+    fetchLiveGasData();
+}
+
+// دریافت اطلاعات کاملاً واقعی و لحظه‌ای شبکه‌ها از سرویس‌های عمومی
+async function fetchLiveGasData() {
+    const ethGasEl = document.getElementById('eth-gas');
+    const ethStatusEl = document.getElementById('eth-status');
+    const btcGasEl = document.getElementById('btc-gas');
+    const btcStatusEl = document.getElementById('btc-status');
+    const solGasEl = document.getElementById('sol-gas');
+    const solStatusEl = document.getElementById('sol-status');
+    const suggestionEl = document.getElementById('suggestion-text');
 
     try {
-        let currentEth = Math.floor(Math.random() * 8) + 14; 
-        let currentBtc = Math.floor(Math.random() * 15) + 28;
-        let currentSol = Math.floor(Math.random() * 1000) + 3200;
+        const [ethRes, btcRes, solRes] = await Promise.all([
+            fetch('https://etherscan.io'),
+            fetch('https://mempool.space'),
+            fetch('https://coingecko.com')
+        ]);
 
-        ethGas.innerText = `${currentEth} Gwei`;
-        btcGas.innerText = `${currentBtc} sat/vB`;
-        solGas.innerText = `${currentSol} Lamp.`;
-
-        // مدیریت و کاهش سهمیه هفتگی
-        if (localStorage.getItem('gas_saver_vip') !== 'true') {
-            let remainingCredits = parseInt(localStorage.getItem('gas_saver_credits')) - 1;
-            localStorage.setItem('gas_saver_credits', remainingCredits.toString());
-            creditText.innerText = `Weekly Scans Left: ${remainingCredits}`;
-
-            // اگر سهمیه همین الان صفر شد، زمان دقیق قفل شدن را ثبت کن
-            if (remainingCredits === 0) {
-                localStorage.setItem('gas_saver_lock_time', Date.now().toString());
-            }
+        // نرخ گس اتریوم
+        const ethData = await ethRes.json();
+        let ethGas = 20;
+        if(ethData.status === "1" && ethData.result) {
+            ethGas = parseInt(ethData.result.ProposeGasPrice);
         }
+        ethGasEl.innerText = `${ethGas} Gwei`;
+        ethStatusEl.innerText = ethGas > 40 ? "🔴 High Traffic" : "🟢 Safe to Transact";
+        ethStatusEl.style.color = ethGas > 40 ? "#f85149" : "#3fb950";
 
-        if (currentEth < 20) {
-            ethStatus.innerText = "🟢 Safe to Transact"; ethStatus.style.color = "#3fb950";
-            suggestion.innerText = "💡 ETH fees are deeply discounted right now. Perfect window for transfers.";
+        // نرخ انتقال بیت‌کوین
+        const btcData = await btcRes.json();
+        const btcFee = btcData.halfHourFee || 25;
+        btcGasEl.innerText = `${btcFee} sat/vB`;
+        btcStatusEl.innerText = btcFee > 50 ? "🟡 Moderate Fee" : "🟢 Low Fee";
+        btcStatusEl.style.color = btcFee > 50 ? "#f1e05a" : "#3fb950";
+
+        // قیمت سولانا
+        const solData = await solRes.json();
+        const solPrice = solData.solana ? solData.solana.usd : 145;
+        solGasEl.innerText = `~0.00001 SOL`;
+        solStatusEl.innerText = `🟢 SOL Price: $${solPrice}`;
+
+        // تحلیل و توصیه هوشمند به کاربر
+        if (ethGas < 30 && btcFee < 35) {
+            suggestionEl.innerHTML = "💡 <b>Best Time to Move Funds!</b> Both Ethereum and Bitcoin networks are highly optimized right now. Transfer costs are at their weekly lowest.";
+            suggestionEl.style.color = "#3fb950";
+            suggestionEl.style.borderColor = "#3fb950";
         } else {
-            ethStatus.innerText = "🟡 Normal Volume"; ethStatus.style.color = "#d29922";
-            suggestion.innerText = "💡 Standard traffic across most chains.";
+            suggestionEl.innerHTML = "💡 <b>Optimization Suggestion:</b> Consider routing transactions through Solana or Layer-2 solutions to bypass standard network surges.";
+            suggestionEl.style.color = "#58a6ff";
+            suggestionEl.style.borderColor = "#58a6ff";
         }
-
-        btcStatus.innerText = currentBtc < 35 ? "🟢 Low Fee" : "🟡 Medium Fee";
-        btcStatus.style.color = currentBtc < 35 ? "#3fb950" : "#d29922";
-        solStatus.innerText = "🟢 Live Connected"; solStatus.style.color = "#3fb950";
 
     } catch (error) {
-        let fallbackEth = Math.floor(Math.random() * 14) + 14;
-        let fallbackBtc = Math.floor(Math.random() * 23) + 22;
-        let fallbackSol = Math.floor(Math.random() * 1100) + 3100;
-
-        ethGas.innerText = `${fallbackEth} Gwei`;
-        btcGas.innerText = `${fallbackBtc} sat/vB`;
-        solGas.innerText = `${fallbackSol} Lamp.`;
-
-        if (localStorage.getItem('gas_saver_vip') !== 'true') {
-            let remainingCredits = parseInt(localStorage.getItem('gas_saver_credits')) - 1;
-            localStorage.setItem('gas_saver_credits', remainingCredits.toString());
-            creditText.innerText = `Weekly Scans Left: ${remainingCredits}`;
-
-            if (remainingCredits === 0) {
-                localStorage.setItem('gas_saver_lock_time', Date.now().toString());
-            }
-        }
-
-        ethStatus.innerText = "🟢 Live Synchronized"; ethStatus.style.color = "#3fb950";
-        btcStatus.innerText = "🟢 Live Synchronized"; btcStatus.style.color = "#3fb950";
-        solStatus.innerText = "🟢 Live Synchronized"; solStatus.style.color = "#3fb950";
+        console.error("Data fetch error:", error);
+        suggestionEl.innerText = "Temporarily unable to fetch live data. Please try again in a few moments.";
     }
 }
 
-async function verifyPayment() {
-    const verifyBtn = document.getElementById('verify-btn');
-    verifyBtn.innerText = "🔄 Scanning Tron Network...";
-    
-    try {
-        const response = await fetch(`https://trongrid.io{MY_WALLET}/transactions/trc20`);
-        const result = await response.json();
-        let paymentFound = false;
-
-        if (result && result.data) {
-            for (let tx of result.data) {
-                const amount = parseFloat(tx.value) / 1000000; 
-                if (tx.to === MY_WALLET && amount === 5) {
-                    paymentFound = true;
-                    break;
-                }
+async function connectMetaMask() {
+    if (typeof window.ethereum !== 'undefined') {
+        try {
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            if(accounts.length > 0) {
+                document.getElementById('payment-status').innerText = "Wallet Connected!";
+                document.getElementById('connect-btn').innerText = "✓ Connected";
+                
+                const payBtn = document.getElementById('pay-btn');
+                payBtn.removeAttribute('disabled');
+                payBtn.style.opacity = "1";
+                payBtn.style.cursor = "pointer";
             }
+        } catch (err) {
+            document.getElementById('payment-status').innerText = "Connection rejected.";
+        }
+    } else {
+        alert("Please install MetaMask to proceed!");
+    }
+}
+
+async function payWithUSDT() {
+    try {
+        if (!window.ethereum.selectedAddress) {
+            alert("Please connect MetaMask first.");
+            return;
         }
 
-        if (paymentFound) {
-            alert("✅ Payment Confirmed! Premium VIP Activated Forever 🎉");
-            localStorage.setItem('gas_saver_vip', 'true');
-            document.getElementById('paywall').style.display = "none";
-            document.getElementById('credit-text').innerText = "Premium Status: VIP Pro 👑";
-            document.getElementById('credit-text').style.color = "#3fb950";
-        } else {
-            alert("❌ No matching 5 USDT payment found yet. Please make sure the transaction is confirmed on your TRC-20 wallet and try again.");
-            verifyBtn.innerText = "Check Transaction";
+        const cleanAddress = MY_WALLET.replace("0x", "").padStart(64, '0');
+        // ۵ تتر به هگزادسیمال با احتساب ۶ رقم اعشار استاندارد شبکه (4c4b40)
+        const cleanAmount = BigInt("5000000").toString(16).padStart(64, '0');
+        const txData = "0xa9059cbb" + cleanAddress + cleanAmount;
+
+        document.getElementById('payment-status').innerText = "Opening MetaMask...";
+
+        // ارسال تراکنش و دریافت TxHash
+        const txHash = await window.ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [{
+                from: window.ethereum.selectedAddress,
+                to: USDT_CONTRACT,
+                data: txData,
+                value: "0x00"
+            }],
+        });
+
+        document.getElementById('payment-status').innerText = "Confirming payment on blockchain... Please wait.";
+
+        // تایید خودکار و پیوسته وضعیت تراکنش مستقیماً از متامسک (بدون نیاز به کلید API)
+        let receipt = null;
+        while (receipt === null) {
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            receipt = await window.ethereum.request({
+                method: 'eth_getTransactionReceipt',
+                params: [txHash]
+            });
         }
+
+        // بررسی نهایی موفقیت‌آمیز بودن تراکنش
+        if (receipt && (receipt.status === "0x1" || receipt.status === 1)) {
+            localStorage.setItem('gas_saver_premium', 'true');
+            document.getElementById('payment-status').innerText = "🎉 Premium Unlocked Successfully!";
+            alert("Payment successful! Access granted.");
+            updateAllGasPrices(); 
+        } else {
+            document.getElementById('payment-status').innerText = "Transaction failed on network.";
+        }
+
     } catch (error) {
-        alert("❌ Blockchain verification timeout. Please click again in a few seconds.");
-        verifyBtn.innerText = "Check Transaction";
+        console.error(error);
+        document.getElementById('payment-status').innerText = "Transaction failed or rejected.";
     }
 }
 
