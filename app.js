@@ -7,7 +7,7 @@ const SEVEN_DAYS_IN_MS = 7 * 24 * 60 * 60 * 1000; // معادل یک هفته ب
 
 // مقداردهی اولیه حافظه دائمی مرورگر
 if (localStorage.getItem('gas_saver_credits') === null) {
-    localStorage.setItem('gas_saver_credits', '3');
+    localStorage.setItem('gas_saver_credits', '3'); // بازگشت به ۳ فرصت اولیه
 }
 if (localStorage.getItem('gas_saver_vip') === null) {
     localStorage.setItem('gas_saver_vip', 'false');
@@ -32,7 +32,7 @@ async function updateAllGasPrices() {
             
             // اگر ۷ روز گذشته باشد، سهمیه هفتگی دوباره تمدید می‌شود
             if (timePassed >= SEVEN_DAYS_IN_MS) {
-                localStorage.setItem('gas_saver_credits', '3');
+                localStorage.setItem('gas_saver_credits', '3'); // بازگشت به ۳ فرصت اولیه در تمدید هفتگی
                 localStorage.removeItem('gas_saver_lock_time'); // پاک کردن زمان قفل قبلی
             }
         }
