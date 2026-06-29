@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GasSaver Premium Pro</title>
+    <title>GasSaver Premium Pro - MetaMask</title>
     <style>
         body {
             background-color: #0d1117;
@@ -72,15 +72,15 @@
             cursor: pointer;
             font-weight: bold;
             width: 100%;
+            margin-top: 10px;
         }
         .btn-refresh:hover { background-color: #2ea44f; }
         
-        /* Paywall screen design */
         .paywall-overlay {
             display: none;
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(22, 27, 34, 0.97);
+            background: rgba(22, 27, 34, 0.98);
             border-radius: 16px;
             z-index: 10;
             flex-direction: column;
@@ -91,11 +91,12 @@
         }
         .paywall-box {
             border: 1px solid #f1e05a;
-            padding: 20px;
+            padding: 25px;
             border-radius: 12px;
             background: #21262d;
+            width: 85%;
         }
-        .btn-vip {
+        .btn-web3 {
             background-color: #f1e05a;
             color: #000;
             border: none;
@@ -103,60 +104,63 @@
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 15px;
+            margin-top: 12px;
             width: 100%;
+            font-size: 14px;
+            transition: 0.2s;
         }
-        .btn-vip:hover { background-color: #e2d14b; }
-        .crypto-address {
-            background: #0d1117;
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            color: #58a6ff;
-            word-break: break-all;
+        .btn-web3:hover { background-color: #e2d14b; }
+        .btn-pay {
+            background-color: #3fb950;
+            color: white;
+        }
+        .btn-pay:hover { background-color: #2ea44f; }
+        .status-log {
+            font-size: 12px;
+            color: #8b949e;
             margin-top: 10px;
-            border: 1px solid #30363d;
-            font-family: monospace;
+            font-style: italic;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- Automated Paywall Screen -->
+    <!-- MetaMask Web3 Automated Paywall -->
     <div class="paywall-overlay" id="paywall">
         <div class="paywall-box">
-            <h2 style="color: #f1e05a; margin-top: 0;">🔒 Free Limit Reached</h2>
-            <p>You have used all 3 free daily scans. Please send exactly 5 USDT to lock in unlimited access forever.</p>
-            <div style="font-weight: bold; color: #fff;">Network: TRON (TRC-20)</div>
-            <div style="font-weight: bold; color: #3fb950; margin-top: 5px;">Price: 5 USDT</div>
+            <h2 style="color: #f1e05a; margin-top: 0;">🔒 Limit Reached</h2>
+            <p style="margin-bottom: 15px;">You have used your 3 free weekly scans. Pay 5 USDT via MetaMask to unlock lifetime access.</p>
             
-            <!-- این آدرس فقط یک راهنماست و آدرس اصلی از روی فایل js لود می‌شود -->
-            <div class="crypto-address" id="display-wallet">Loading Address...</div>
+            <div style="font-weight: bold; color: #fff; margin-bottom: 5px;">Network: BNB Smart Chain (BSC)</div>
+            <div style="font-weight: bold; color: #3fb950; margin-top: 5px;">Price: 5.00 USDT</div>
             
-            <button class="btn-vip" id="verify-btn" onclick="verifyPayment()">Check Transaction</button>
+            <button class="btn-web3" id="connect-btn" onclick="connectMetaMask()">1. Connect MetaMask</button>
+            <button class="btn-web3 btn-pay" id="pay-btn" onclick="payWithUSDT()" disabled style="opacity: 0.5; cursor: not-allowed;">2. Pay 5 USDT Now</button>
+            
+            <div class="status-log" id="payment-status">Wallet not connected</div>
         </div>
     </div>
 
-    <h1>⛽ GasSaver</h1>
+    <h1>⛽ GasSaver Pro</h1>
     <p>Predict & save up to 70% on crypto network fees</p>
     
-    <div class="credit-badge" id="credit-text">Free Scans Left: 3</div>
+    <div class="credit-badge" id="credit-text">Weekly Scans Left: 3</div>
 
     <div class="network-grid">
         <div class="network-card">
-            <h3>Ethereum Network (ETH)</h3>
+            <h3>Ethereum Gas (ETH)</h3>
             <div class="gas-value" id="eth-gas">-- Gwei</div>
             <div class="status-badge" id="eth-status">Loading...</div>
         </div>
         <div class="network-card">
-            <h3>Bitcoin Network (BTC)</h3>
+            <h3>Bitcoin Fee (BTC)</h3>
             <div class="gas-value" id="btc-gas">-- sat/vB</div>
             <div class="status-badge" id="btc-status">Loading...</div>
         </div>
         <div class="network-card">
-            <h3>Solana Network (SOL)</h3>
-            <div class="gas-value" id="sol-gas">-- Lamports</div>
+            <h3>Solana Price (SOL)</h3>
+            <div class="gas-value" id="sol-gas">-- USD</div>
             <div class="status-badge" id="sol-status">Loading...</div>
         </div>
     </div>
